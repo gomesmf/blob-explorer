@@ -1,0 +1,87 @@
+name: blob-explorer
+
+services:
+  # Azure Blob emulator. --loose stops it rejecting headers from non-Microsoft
+  # clients (rclone, jclouds, the Azure SDK inside DuckDB).
+  azurite:
+    image: mcr.microsoft.com/azure-storage/azurite:latest
+    container_name: bx-azurite
+    command: >
+      azurite
+      --blobHost 0.0.0.0 --queueHost 0.0.0.0 --tableHost 0.0.0.0
+      --location /data --loose --skipApiVersionCheck
+    ports:
+      - "10000:10000"   # blob
+      - "10001:10001"   # queue
+      - "10002:10002"   # table
+    volumes:
+      - azurite-data:/data
+    healthcheck:
+      test: ["CMD", "nc", "-z", "127.0.0.1", "10000"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  # S3 API in front of Azurite. Required by Filestash (its azure backend
+  # hardcodes blob.core.windows.net and cannot target an emulator), and it
+  # unlocks every S3 tool: duckdb httpfs, s5cmd, aws cli, minio clients.
+  # The entrypoint maps no JCLOUDS_ENDPOINT, so the endpoint goes through
+  # S3PROXY_JAVA_OPTS -D, which overrides the generated properties file.
+  s3proxy:
+    image: andrewgaul/s3proxy:latest
+    container_name: bx-s3proxy
+    depends_on:
+      azurite:
+        condition: service_healthy
+    environment:
+      S3PROXY_ENDPOINT: http://0.0.0.0:80
+      S3PROXY_AUTHORIZATION: aws-v4
+      S3PROXY_IDENTITY: local
+      S3PROXY_CREDENTIAL: localsecret
+      S3PROXY_IGNORE_UNKNOWN_HEADERS: "true"
+      JCLOUDS_PROVIDER: azureblob
+      JCLOUDS_IDENTITY: devstoreaccount1
+      JCLOUDS_CREDENTIAL: ${AZURE_STORAGE_KEY}
+      S3PROXY_JAVA_OPTS: -Djclouds.endpoint=http://azurite:10000/devstoreaccount1
+      LOG_LEVEL: info
+    ports:
+      - "8080:80"
+
+  # Dropbox-style web file manager: folder navigation over blob prefixes,
+  # inline preview, download. Connections are pre-seeded in config.json.
+  filestash:
+    image: machines/filestash:latest
+    container_name: bx-filestash
+    depends_on:
+      - s3proxy
+    environment:
+      APPLICATION_URL: ""
+      CANARY: "false"
+    ports:
+      - "8334:8334"
+    volumes:
+      - filestash-state:/app/data/state
+      - ./docker/filestash/config.json:/app/data/state/config/config.json
+
+  # rclone's browser file manager + remote-control API. Optional.
+  rclone-webgui:
+    image: rclone/rclone:latest
+    container_name: bx-rclone-webgui
+    profiles: ["ui"]
+    depends_on:
+      azurite:
+        condition: service_healthy
+    command: >
+      rcd --rc-web-gui --rc-web-gui-no-open-browser
+      --rc-addr :5572 --rc-no-auth
+    environment:
+      RCLONE_CONFIG_AZURITE_TYPE: azureblob
+      RCLONE_CONFIG_AZURITE_ACCOUNT: devstoreaccount1
+      RCLONE_CONFIG_AZURITE_KEY: ${AZURE_STORAGE_KEY}
+      RCLONE_CONFIG_AZURITE_ENDPOINT: http://azurite:10000/devstoreaccount1
+    ports:
+      - "5572:5572"
+
+volumes:
+  azurite-data:
+  filestash-state:

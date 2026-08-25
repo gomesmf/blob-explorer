@@ -1,0 +1,20 @@
+{
+    "general": {
+        "secret_key": "blob-explorer-dev-key",
+        "name": "blob-explorer",
+        "editor": "base",
+        "fork_button": false,
+        "display_hidden": true
+    },
+    "connections": [
+        {
+            "label": "Azurite (S3 via s3proxy)",
+            "type": "s3",
+            "access_key_id": "local",
+            "secret_access_key": "localsecret",
+            "endpoint": "http://s3proxy:80",
+            "region": "us-east-1",
+            "advanced": true
+        }
+    ]
+}

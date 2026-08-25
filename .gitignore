@@ -1,0 +1,10 @@
+.env
+dev.duckdb
+dev.duckdb.wal
+.venv/
+__pycache__/
+*.pyc
+uv.lock
+go/bin/
+data-out/
+.rclone-mnt/
