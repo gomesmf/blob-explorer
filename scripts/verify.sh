@@ -157,5 +157,18 @@ else
 fi
 
 echo
+echo "make targets (ARGS must survive the shell, not be parsed by it)"
+
+# Parentheses and globs in SQL used to blow up: $(ARGS) expanded straight into
+# the recipe, so bash parsed the query. ARGS is exported and quoted now.
+mk_rows=$(make -s blobq ARGS="SELECT count(*) AS n FROM 'az://data/events/**/*.parquet' WHERE 1 > 0" 2>/dev/null \
+  | tail -1 | tr -d ' ')
+check "make blobq ARGS with ( ) * >" "$EXPECTED_ROWS" "${mk_rows:-none}"
+
+# blobctl still needs word splitting, so its ARGS must not be over-quoted.
+mk_dirs=$(make -s blobctl ARGS="ls events" 2>/dev/null | grep -c 'dt=')
+check "make blobctl ARGS word splitting" "7" "${mk_dirs:-none}"
+
+echo
 printf '%d passed, %d failed, %d skipped\n' "$pass" "$fail" "$skip"
 [[ "$fail" -eq 0 ]]

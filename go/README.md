@@ -12,6 +12,7 @@ Three small CLIs covering the three ways a Go service touches blob storage.
 make go-build                                   # -> go/bin
 make blobctl ARGS="tree events"
 make blobq   ARGS="SELECT region, count(*) FROM events GROUP BY region"
+make blobq                                      # default query, no ARGS
 ```
 
 ## blobctl
@@ -54,3 +55,18 @@ the browser drops straight into Go.
 statically linked into go-duckdb. The first run downloads it from the DuckDB
 extension repository, then caches it in `~/.duckdb/extensions`. In a container,
 either pre-warm that cache or bake the extension into the image.
+
+## ARGS quoting
+
+`ARGS` is exported by the Makefile and quoted as `"$ARGS"` in the `blobq`
+recipe, so SQL containing `(`, `*`, `>` or quotes reaches DuckDB intact.
+`blobctl` and `portable` deliberately leave it unquoted, because those take
+subcommands that must word-split:
+
+```bash
+make blobq   ARGS="SELECT count(*) FROM events WHERE amount > 0"   # one argument
+make blobctl ARGS="ls events"                                      # two arguments
+```
+
+Running the binaries directly, quote as usual:
+`go run ./cmd/blobq "SELECT count(*) FROM events"`.
