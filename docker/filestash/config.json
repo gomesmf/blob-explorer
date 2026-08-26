@@ -1,20 +1,107 @@
 {
     "general": {
-        "secret_key": "blob-explorer-dev-key",
         "name": "blob-explorer",
+        "port": null,
+        "host": null,
+        "secret_key": "blobexplorerdevsecretkey32bytes!",
+        "force_ssl": null,
         "editor": "base",
+        "logout": null,
+        "display_hidden": true,
+        "refresh_after_upload": null,
+        "open_mode": null,
+        "upload_button": null,
+        "upload_pool_size": null,
+        "upload_chunk_size": null,
+        "buffer_size": null,
+        "filepage_default_view": null,
+        "filepage_default_sort": null,
+        "cookie_timeout": null,
+        "extended_session": null,
+        "custom_css": null,
         "fork_button": false,
-        "display_hidden": true
+        "license": null
+    },
+    "features": {
+        "api": {
+            "enable": null
+        },
+        "share": {
+            "enable": null,
+            "default_access": null,
+            "redirect": null
+        },
+        "protection": {
+            "iframe": null,
+            "enable_chromecast": null,
+            "signature": null,
+            "enable": null,
+            "disable_csp": null,
+            "zip_timeout": null,
+            "disable_svg": null
+        },
+        "collaborative": {
+            "enable": null
+        },
+        "site": {
+            "enable": null,
+            "autoindex": null,
+            "cors_allow_origins": null
+        },
+        "workflow": {
+            "enable": null,
+            "workers": null
+        },
+        "video": {
+            "enable_transcoder": null,
+            "encoder": null,
+            "blacklist_format": null
+        },
+        "server": {
+            "console_enable": null
+        },
+        "office": {
+            "rewrite_discovery_url": null,
+            "enable": null,
+            "filestash_server": null,
+            "office_server": null
+        },
+        "mcp": {
+            "enable": null
+        },
+        "search": {
+            "explore_timeout": null
+        }
+    },
+    "log": {
+        "enable": null,
+        "level": null,
+        "telemetry": null
+    },
+    "email": {
+        "server": null,
+        "port": null,
+        "username": null,
+        "password": null,
+        "from": null
+    },
+    "auth": {
+        "admin": "$2a$10$heSX5E5g3xvRPwV3Gyopj.Cbwc4lmfmY2R7K2m4jE51ogyZiWMXcm"
+    },
+    "constant": {
+        "user": "filestash",
+        "license": "agpl"
+    },
+    "middleware": {
+        "identity_provider": {
+            "type": null
+        },
+        "attribute_mapping": null
     },
     "connections": [
         {
-            "label": "Azurite (S3 via s3proxy)",
             "type": "s3",
-            "access_key_id": "local",
-            "secret_access_key": "localsecret",
-            "endpoint": "http://s3proxy:80",
-            "region": "us-east-1",
-            "advanced": true
+            "label": "Azurite (S3 via s3proxy)"
         }
     ]
 }

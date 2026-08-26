@@ -22,7 +22,7 @@ Prerequisites: Docker, [uv](https://docs.astral.sh/uv/). Optional but worth it:
 
 | URL | What |
 |---|---|
-| `:8334` | Filestash — browse blobs like a filesystem, preview, download |
+| `:8334` | Filestash — browse blobs like a filesystem, preview, download (admin password `blobexplorer`) |
 | `:4213` | DuckDB UI — SQL notebook, catalog browser (after `make ui`) |
 | `:10000` | Azurite — the blob endpoint itself |
 | `:8080` | s3proxy — the same blobs over the S3 API |

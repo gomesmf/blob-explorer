@@ -70,8 +70,20 @@ Both return the same rows; `make verify` asserts it.
   and credential become properties. The endpoint goes in via
   `S3PROXY_JAVA_OPTS: -Djclouds.endpoint=...`, since system properties override
   the generated file.
+- **Filestash's `secret_key` must be exactly 16, 24 or 32 bytes.** It is the
+  AES key for stored connection credentials; any other length fails the admin
+  console with `Crypto/aes: invalid key size N`.
+- **Filestash's API needs `X-Requested-With: XmlHttpRequest`.** Without it
+  every call returns `Not Allowed` — CSRF protection, not a misconfiguration.
+- **Filestash rewrites its bind-mounted config.json** on boot, filling in
+  defaults and the `auth` block. Expect the committed file to be the
+  normalised form.
 - **Azurite rejects `Put Block From URL`**, so s3proxy streams server-side
   copies through itself. Slower, harmless for dev.
+- **DuckDB is single-writer.** A running `make ui` holds the lock on
+  `dev.duckdb`; a second `duckdb dev.duckdb` fails with `Conflicting lock is
+  held`. Close the UI, or point the other session at a different database —
+  the views are only a convenience, `az://` globs work from anywhere.
 - **`abfs://`, not `abfss://`** when registering adlfs with DuckDB.
 - **`go-duckdb` needs `CGO_ENABLED=1`**, and the azure extension is not
   statically linked — the first run downloads it, then caches in

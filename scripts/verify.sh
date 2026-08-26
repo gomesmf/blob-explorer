@@ -42,6 +42,35 @@ probe_http filestash "http://127.0.0.1:8334/"                            '200|30
 probe_http s3proxy   "http://127.0.0.1:8080/"                            '403|400'
 
 echo
+echo "filestash (drives the real API, not just the status code)"
+
+# secret_key encrypts stored connection credentials with AES: 16, 24 or 32 bytes.
+key_len=$(python3 -c 'import json;print(len(json.load(open("docker/filestash/config.json"))["general"]["secret_key"]))' 2>/dev/null)
+if [[ "$key_len" =~ ^(16|24|32)$ ]]; then
+  ok "secret_key is a valid AES length ($key_len)"
+else
+  bad "secret_key length" "must be 16/24/32 bytes, got ${key_len:-none}"
+fi
+
+jar=$(mktemp)
+sess=$(curl -s --max-time 20 -X POST http://127.0.0.1:8334/api/session \
+  -H 'Content-Type: application/json' -c "$jar" \
+  -d '{"type":"s3","access_key_id":"local","secret_access_key":"localsecret","endpoint":"http://s3proxy:80","region":"us-east-1"}' \
+  2>/dev/null | python3 -c 'import json,sys; print(json.load(sys.stdin)["status"])' 2>/dev/null)
+check "authenticates against s3proxy" "ok" "${sess:-none}"
+
+# X-Requested-With is required; without it every call is "Not Allowed".
+fs_dirs=$(curl -s --max-time 25 -b "$jar" -H 'X-Requested-With: XmlHttpRequest' \
+  'http://127.0.0.1:8334/api/files/ls?path=%2Fdata%2Fevents%2F' 2>/dev/null \
+  | python3 -c 'import json,sys; print(sum(1 for f in json.load(sys.stdin)["results"] if f["type"]=="directory"))' 2>/dev/null)
+check "lists blob prefixes as folders" "7" "${fs_dirs:-none}"
+
+fs_cat=$(curl -s --max-time 25 -b "$jar" -H 'X-Requested-With: XmlHttpRequest' \
+  'http://127.0.0.1:8334/api/files/cat?path=%2Fdata%2Fraw%2FREADME.txt' 2>/dev/null | head -c 6)
+check "downloads a file" "Seeded" "${fs_cat:-none}"
+rm -f "$jar"
+
+echo
 echo "row counts (every path reads the same parquet)"
 
 py_rows=$(uv run --directory python python -c '
@@ -74,8 +103,12 @@ go_rows=$(cd go && CGO_ENABLED=1 go run ./cmd/blobq -format csv \
 check "go / go-duckdb" "$EXPECTED_ROWS" "${go_rows:-none}"
 
 if command -v duckdb >/dev/null; then
-  cli_rows=$(duckdb -init duckdb/init.sql -noheader -list dev.duckdb \
+  # DuckDB is single-writer: a running `make ui` holds the lock on dev.duckdb.
+  # Use a scratch database so verify works whether or not the UI is open.
+  scratch=$(mktemp -u).duckdb
+  cli_rows=$(duckdb -init duckdb/init.sql -noheader -list "$scratch" \
     -c "SELECT count(*) FROM events" 2>/dev/null | tail -1 | tr -d ' ')
+  rm -f "$scratch" "$scratch".wal
   check "duckdb CLI / init.sql views" "$EXPECTED_ROWS" "${cli_rows:-none}"
 else
   note "duckdb CLI" "brew install duckdb"

@@ -45,8 +45,8 @@ Mounts as a Finder volume with Quick Look and drag-and-drop. Better than
 make up && open http://127.0.0.1:8334
 ```
 
-First visit asks you to set an admin password. The `Azurite (S3 via s3proxy)`
-connection is pre-filled — hit connect. Folder navigation, inline preview for
+The admin password is pre-seeded as **`blobexplorer`**, and the
+`Azurite (S3 via s3proxy)` connection is pre-filled — just hit connect. Folder navigation, inline preview for
 CSV/JSON/text/images, download, drag-and-drop upload.
 
 ## 3. rclone in the terminal
