@@ -100,9 +100,10 @@ rclone-webdav: rclone-check ## serve blobs over WebDAV on :8081
 	@echo 'Finder: Cmd+K -> http://127.0.0.1:8081 (no macFUSE needed)'
 	$(RC) serve webdav azurite:$${BLOB_CONTAINER:-data} --addr 127.0.0.1:8081
 
-rclone-mount: rclone-check ## mount blobs as a Finder folder (needs macFUSE)
+rclone-mount: rclone-check ## mount blobs as a real folder via NFS (no macFUSE)
 	@mkdir -p $(MNT)
-	$(RC) mount azurite:$${BLOB_CONTAINER:-data} $(MNT) --vfs-cache-mode full
+	@echo 'mounting at $(MNT) — Ctrl-C here, then `make rclone-unmount`'
+	$(RC) nfsmount azurite:$${BLOB_CONTAINER:-data} $(MNT) --vfs-cache-mode full
 
 rclone-unmount: ## unmount the folder from rclone-mount
 	-umount $(MNT) 2>/dev/null || diskutil unmount force $(MNT)

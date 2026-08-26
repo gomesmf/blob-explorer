@@ -29,13 +29,17 @@ done
 
 echo
 echo "http endpoints"
-for probe in "azurite:http://127.0.0.1:10000/devstoreaccount1?comp=list:403" \
-             "filestash:http://127.0.0.1:8334/:200"; do
-  name="${probe%%:*}"; rest="${probe#*:}"
-  url="${rest%:*}"; want="${rest##*:}"
+# Azurite 403s an unsigned request; Filestash 307s to /login. Both mean "alive".
+probe_http() {
+  local name="$1" url="$2" want="$3"
+  local got
   got=$(curl -s -o /dev/null -w '%{http_code}' --max-time 10 "$url" 2>/dev/null)
-  check "$name responds ($want)" "$want" "$got"
-done
+  if [[ "$got" =~ ^($want)$ ]]; then ok "$name responds ($got)"
+  else bad "$name responds" "expected $want, got ${got:-none}"; fi
+}
+probe_http azurite   "http://127.0.0.1:10000/devstoreaccount1?comp=list" '403'
+probe_http filestash "http://127.0.0.1:8334/"                            '200|307'
+probe_http s3proxy   "http://127.0.0.1:8080/"                            '403|400'
 
 echo
 echo "row counts (every path reads the same parquet)"
@@ -95,7 +99,7 @@ gocloud_files=$(cd go && go run ./cmd/portable ls "events/" 2>/dev/null | grep -
 check "go / gocloud.dev" "7" "${gocloud_files:-none}"
 
 if command -v rclone >/dev/null; then
-  rc_files=$(rclone --config rclone/rclone.conf ls azurite:data 2>/dev/null | grep -c '\.parquet')
+  rc_files=$(rclone --config rclone/rclone.conf ls azurite:data/events 2>/dev/null | grep -c '\.parquet')
   check "rclone / azureblob" "7" "${rc_files:-none}"
 else
   note "rclone" "brew install rclone"
