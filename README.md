@@ -13,7 +13,20 @@ make seed        # 49k rows of hive-partitioned parquet
 make ui          # DuckDB SQL notebook on :4213
 ```
 
-Then `open http://127.0.0.1:8334` to browse the blobs as folders.
+Then `open http://127.0.0.1:8334` to browse the blobs as folders. Pick the
+`Azurite` connection and log in with:
+
+| Field | Value |
+|---|---|
+| Access Key ID | `local` |
+| Secret Access Key | `localsecret` |
+| Endpoint | `http://s3proxy:80` |
+| Region | `us-east-1` |
+
+The endpoint is the container name, not `127.0.0.1:8080` — Filestash dials from
+inside the compose network. Filestash refuses to store these for you (see
+[docs/tools.md](docs/tools.md)); the admin console at `/admin` is a separate
+login, password `blobexplorer`.
 
 Prerequisites: Docker, [uv](https://docs.astral.sh/uv/). Optional but worth it:
 `brew install duckdb rclone`.
@@ -22,7 +35,7 @@ Prerequisites: Docker, [uv](https://docs.astral.sh/uv/). Optional but worth it:
 
 | URL | What |
 |---|---|
-| `:8334` | Filestash — browse blobs like a filesystem, preview, download (admin password `blobexplorer`) |
+| `:8334` | Filestash — browse blobs like a filesystem, preview, download |
 | `:4213` | DuckDB UI — SQL notebook, catalog browser (after `make ui`) |
 | `:10000` | Azurite — the blob endpoint itself |
 | `:8080` | s3proxy — the same blobs over the S3 API |

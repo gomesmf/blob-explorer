@@ -19,8 +19,8 @@
         "cookie_timeout": null,
         "extended_session": null,
         "custom_css": null,
-        "fork_button": false,
-        "license": null
+        "license": null,
+        "fork_button": false
     },
     "features": {
         "api": {
@@ -35,42 +35,42 @@
             "iframe": null,
             "enable_chromecast": null,
             "signature": null,
-            "enable": null,
-            "disable_csp": null,
             "zip_timeout": null,
+            "disable_csp": null,
+            "enable": null,
             "disable_svg": null
+        },
+        "office": {
+            "rewrite_discovery_url": null,
+            "filestash_server": null,
+            "enable": null,
+            "office_server": null
+        },
+        "workflow": {
+            "enable": null,
+            "workers": null
         },
         "collaborative": {
             "enable": null
+        },
+        "video": {
+            "enable_transcoder": null,
+            "blacklist_format": null,
+            "encoder": null
         },
         "site": {
             "enable": null,
             "autoindex": null,
             "cors_allow_origins": null
         },
-        "workflow": {
-            "enable": null,
-            "workers": null
-        },
-        "video": {
-            "enable_transcoder": null,
-            "encoder": null,
-            "blacklist_format": null
-        },
         "server": {
             "console_enable": null
         },
-        "office": {
-            "rewrite_discovery_url": null,
-            "enable": null,
-            "filestash_server": null,
-            "office_server": null
+        "search": {
+            "explore_timeout": null
         },
         "mcp": {
             "enable": null
-        },
-        "search": {
-            "explore_timeout": null
         }
     },
     "log": {
@@ -101,7 +101,7 @@
     "connections": [
         {
             "type": "s3",
-            "label": "Azurite (S3 via s3proxy)"
+            "label": "Azurite - local/localsecret @ http://s3proxy:80"
         }
     ]
 }

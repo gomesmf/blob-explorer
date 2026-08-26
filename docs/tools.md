@@ -73,6 +73,11 @@ Both return the same rows; `make verify` asserts it.
 - **Filestash's `secret_key` must be exactly 16, 24 or 32 bytes.** It is the
   AES key for stored connection credentials; any other length fails the admin
   console with `Crypto/aes: invalid key size N`.
+- **Filestash will not store S3 credentials in a connection.** It strips them
+  out of `config.json` on disk shortly after boot, by design: a connection
+  declares which backend is offered, and the user supplies credentials at
+  `/login`. Do not try to pre-fill them — put them in the connection label
+  instead, which is what this repo does.
 - **Filestash's API needs `X-Requested-With: XmlHttpRequest`.** Without it
   every call returns `Not Allowed` — CSRF protection, not a misconfiguration.
 - **Filestash rewrites its bind-mounted config.json** on boot, filling in
