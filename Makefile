@@ -5,6 +5,12 @@ DUCK  := duckdb -init $(ROOT)/duckdb/init.sql $(ROOT)/dev.duckdb
 RC    := rclone --config $(ROOT)/rclone/rclone.conf
 MNT   := $(ROOT)/.rclone-mnt
 
+# ARGS is exported so recipes can quote it as "$$ARGS". Expanding $(ARGS)
+# straight into a recipe lets the shell parse its contents, which breaks on
+# any SQL containing ( ) * > etc.
+ARGS  ?=
+export ARGS
+
 .DEFAULT_GOAL := help
 
 ## ---- stack ----------------------------------------------------------------
@@ -58,7 +64,7 @@ notebook: ## marimo notebook with SQL cells
 	$(PY) marimo edit $(ROOT)/python/notebooks/explore.py
 
 query: ## python: duckdb azure extension (add ARGS=--write to demo COPY TO)
-	$(PY) blobx-query $(ARGS)
+	$(PY) blobx-query $$ARGS
 
 query-fsspec: ## python: duckdb over fsspec/adlfs instead of the extension
 	$(PY) blobx-query-fsspec
@@ -77,13 +83,13 @@ go-build: ## build the three Go CLIs into go/bin
 	@ls -1 $(ROOT)/go/bin
 
 blobctl: ## go: browse blobs with the Azure SDK (ARGS="tree events")
-	cd $(ROOT)/go && go run ./cmd/blobctl $(ARGS)
+	cd $(ROOT)/go && go run ./cmd/blobctl $$ARGS
 
 portable: ## go: same ops through gocloud.dev (BLOB_URL swaps backend)
-	cd $(ROOT)/go && go run ./cmd/portable $(ARGS)
+	cd $(ROOT)/go && go run ./cmd/portable $$ARGS
 
 blobq: ## go: query blob parquet with duckdb in-process (ARGS="SELECT ...")
-	cd $(ROOT)/go && CGO_ENABLED=1 go run ./cmd/blobq $(ARGS)
+	cd $(ROOT)/go && CGO_ENABLED=1 go run ./cmd/blobq "$$ARGS"
 
 ## ---- rclone ---------------------------------------------------------------
 
