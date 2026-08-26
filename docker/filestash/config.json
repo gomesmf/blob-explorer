@@ -35,16 +35,32 @@
             "iframe": null,
             "enable_chromecast": null,
             "signature": null,
+            "disable_svg": null,
             "zip_timeout": null,
-            "disable_csp": null,
             "enable": null,
-            "disable_svg": null
+            "disable_csp": null
         },
         "office": {
-            "rewrite_discovery_url": null,
+            "office_server": null,
             "filestash_server": null,
             "enable": null,
-            "office_server": null
+            "rewrite_discovery_url": null
+        },
+        "video": {
+            "enable_transcoder": null,
+            "encoder": null,
+            "blacklist_format": null
+        },
+        "site": {
+            "enable": null,
+            "autoindex": null,
+            "cors_allow_origins": null
+        },
+        "mcp": {
+            "enable": null
+        },
+        "server": {
+            "console_enable": null
         },
         "workflow": {
             "enable": null,
@@ -53,24 +69,8 @@
         "collaborative": {
             "enable": null
         },
-        "video": {
-            "enable_transcoder": null,
-            "blacklist_format": null,
-            "encoder": null
-        },
-        "site": {
-            "enable": null,
-            "autoindex": null,
-            "cors_allow_origins": null
-        },
-        "server": {
-            "console_enable": null
-        },
         "search": {
             "explore_timeout": null
-        },
-        "mcp": {
-            "enable": null
         }
     },
     "log": {
@@ -86,11 +86,7 @@
         "from": null
     },
     "auth": {
-        "admin": "$2a$10$heSX5E5g3xvRPwV3Gyopj.Cbwc4lmfmY2R7K2m4jE51ogyZiWMXcm"
-    },
-    "constant": {
-        "user": "filestash",
-        "license": "agpl"
+        "admin": "$2a$10$roRkwK1p25FnpGfr.pDLped2NI0VbHo9FJksFDf04E/sInLTL6o6y"
     },
     "middleware": {
         "identity_provider": {
@@ -98,10 +94,14 @@
         },
         "attribute_mapping": null
     },
+    "constant": {
+        "user": "filestash",
+        "license": "agpl"
+    },
     "connections": [
         {
             "type": "s3",
-            "label": "Azurite - local/localsecret @ http://s3proxy:80"
+            "label": "Azurite | local / localsecret | Advanced > Endpoint http://s3proxy:80"
         }
     ]
 }

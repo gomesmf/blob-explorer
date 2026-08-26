@@ -78,6 +78,9 @@ Both return the same rows; `make verify` asserts it.
   declares which backend is offered, and the user supplies credentials at
   `/login`. Do not try to pre-fill them — put them in the connection label
   instead, which is what this repo does.
+- **Filestash's S3 Endpoint field hides behind the `Advanced` toggle.** Skip
+  it and the backend talks to real AWS, failing with `Invalid account` — which
+  looks nothing like a configuration problem.
 - **Filestash's API needs `X-Requested-With: XmlHttpRequest`.** Without it
   every call returns `Not Allowed` — CSRF protection, not a misconfiguration.
 - **Filestash rewrites its bind-mounted config.json** on boot, filling in

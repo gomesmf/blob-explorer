@@ -13,20 +13,22 @@ make seed        # 49k rows of hive-partitioned parquet
 make ui          # DuckDB SQL notebook on :4213
 ```
 
-Then `open http://127.0.0.1:8334` to browse the blobs as folders. Pick the
-`Azurite` connection and log in with:
+Then `open http://127.0.0.1:8334`. Pick the **Azurite** connection and log in:
 
 | Field | Value |
 |---|---|
 | Access Key ID | `local` |
 | Secret Access Key | `localsecret` |
-| Endpoint | `http://s3proxy:80` |
-| Region | `us-east-1` |
+| **Advanced** ▸ Endpoint | `http://s3proxy:80` |
 
-The endpoint is the container name, not `127.0.0.1:8080` — Filestash dials from
-inside the compose network. Filestash refuses to store these for you (see
-[docs/tools.md](docs/tools.md)); the admin console at `/admin` is a separate
-login, password `blobexplorer`.
+You must click **Advanced** to reveal the Endpoint field — without it Filestash
+talks to real AWS and fails with `Invalid account`. The endpoint is the
+*container name*: Filestash dials from inside the compose network, so
+`127.0.0.1:8080` is Filestash itself, not s3proxy. Region can be left blank.
+
+Filestash will not remember these (see [docs/tools.md](docs/tools.md)), so they
+are repeated in the connection label. The admin console at `/admin` is a
+separate login, password `blobexplorer`.
 
 Prerequisites: Docker, [uv](https://docs.astral.sh/uv/). Optional but worth it:
 `brew install duckdb rclone`.

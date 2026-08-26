@@ -52,12 +52,30 @@ else
   bad "secret_key length" "must be 16/24/32 bytes, got ${key_len:-none}"
 fi
 
+# The documented admin password must actually work. Filestash rewrites the
+# bind-mounted config on boot, so a hand-seeded hash can silently be replaced.
+adm=$(curl -s --max-time 15 -X POST http://127.0.0.1:8334/admin/api/session \
+  -H 'Content-Type: application/json' -d '{"password":"blobexplorer"}' 2>/dev/null \
+  | python3 -c 'import json,sys; print(json.load(sys.stdin)["status"])' 2>/dev/null)
+check "documented admin password works" "ok" "${adm:-none}"
+
+# Exactly what a person types at /login: two keys plus the endpoint that lives
+# behind the Advanced toggle. Region is optional.
 jar=$(mktemp)
 sess=$(curl -s --max-time 20 -X POST http://127.0.0.1:8334/api/session \
   -H 'Content-Type: application/json' -c "$jar" \
-  -d '{"type":"s3","access_key_id":"local","secret_access_key":"localsecret","endpoint":"http://s3proxy:80","region":"us-east-1"}' \
+  -d '{"type":"s3","access_key_id":"local","secret_access_key":"localsecret","endpoint":"http://s3proxy:80"}' \
   2>/dev/null | python3 -c 'import json,sys; print(json.load(sys.stdin)["status"])' 2>/dev/null)
-check "authenticates against s3proxy" "ok" "${sess:-none}"
+check "login with the documented fields" "ok" "${sess:-none}"
+
+# The endpoint is the only hint that survives Filestash's config rewrite.
+label=$(curl -s --max-time 20 -H 'X-Requested-With: XmlHttpRequest' \
+  http://127.0.0.1:8334/api/config 2>/dev/null \
+  | python3 -c 'import json,sys; print(json.load(sys.stdin)["result"]["connections"][0]["label"])' 2>/dev/null)
+case "$label" in
+  *s3proxy:80*) ok "login hint reaches the form" ;;
+  *) bad "login hint reaches the form" "label lost the endpoint: ${label:-none}" ;;
+esac
 
 # X-Requested-With is required; without it every call is "Not Allowed".
 fs_dirs=$(curl -s --max-time 25 -b "$jar" -H 'X-Requested-With: XmlHttpRequest' \

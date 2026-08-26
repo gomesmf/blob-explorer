@@ -45,22 +45,25 @@ Mounts as a Finder volume with Quick Look and drag-and-drop. Better than
 make up && open http://127.0.0.1:8334
 ```
 
-Pick the `Azurite` connection and fill in:
+Pick the **Azurite** connection and log in:
 
 | Field | Value |
 |---|---|
 | Access Key ID | `local` |
 | Secret Access Key | `localsecret` |
-| Endpoint | `http://s3proxy:80` |
-| Region | `us-east-1` |
+| **Advanced** ▸ Endpoint | `http://s3proxy:80` |
 
-The endpoint is the **container name**, not `127.0.0.1:8080` — Filestash dials
-from inside the compose network. The credentials are repeated in the connection
-label so they are on screen when you need them; Filestash will not store them
-for you.
+You must click **Advanced** to reveal the Endpoint field — without it Filestash
+talks to real AWS and fails with `Invalid account`. The endpoint is the
+*container name*: Filestash dials from inside the compose network, so
+`127.0.0.1:8080` is Filestash itself, not s3proxy. Region can be left blank.
 
-The separate admin console at `/admin` uses the password **`blobexplorer`**. Folder navigation, inline preview for
-CSV/JSON/text/images, download, drag-and-drop upload.
+Filestash will not remember these (see [tools.md](tools.md)), so they are
+repeated in the connection label. The admin console at `/admin` is a separate
+login, password `blobexplorer`.
+
+Once in: folder navigation, inline preview for CSV/JSON/text/images, download,
+drag-and-drop upload.
 
 ## 3. rclone in the terminal
 
